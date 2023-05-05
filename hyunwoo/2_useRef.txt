@@ -1,0 +1,84 @@
+
+ex) const [count, setCount] = useState(0);
+const countRef = useRef(0);
+
+const increaseCountState = () => {
+    setCount(count + 1);
+}
+const increaseCountRef = () => {
+    countRef.current += 1
+}
+
+return (
+    <div>
+        <p>State: {count}</p>
+        <p>State: {countRef.current}</p>
+        <button onClick={increaseCountState}>State 올려</button>
+        <button onClick={increaseRef}>Ref 올려</button> // 올라가고 있으니 렌더링되지는 않음
+    </div>
+)
+
+ex) const [renderer, setRenderer] = useState(0);
+const countRef = useRef(0); // 전 생애 동안 유지.
+let countVar = 0; // 렌더링 때마다 초기화. 렌더 전까지는 올라가는 것이 맞으나 실제로는 변경안됨.
+
+const doRendering = () => {
+    setRenderer(renderer + 1)
+}
+const increaseRef = () => {
+    countRef.current += 1
+}
+const increaseVar = () => {
+    countVar += 1
+}
+
+return (
+    <div>
+        <p>State: {count}</p>
+        <p>State: {countRef.current}</p>
+        <button onClick={increaseCountState}>State 올려</button>
+        <button onClick={increaseRef}>Ref 올려</button> // 올라가고 있으니 렌더링되지는 않음
+    </div>
+)
+
+ex) 렌더링 횟수? useEffect 쓰기(나중에)
+
+const [renderer, setRenderer] = useState(0);
+const countRef = useRef(0); // 전 생애 동안 유지.
+let countVar = 0; // 렌더링 때마다 초기화. 렌더 전까지는 올라가는 것이 맞으나 실제로는 변경안됨.
+
+const doRendering = () => {
+    setRenderer(renderer + 1)
+}
+const increaseRef = () => {
+    countRef.current += 1
+}
+const increaseVar = () => {
+    countVar += 1
+}
+
+return (
+    <div>
+        <p>State: {count}</p>
+        <p>State: {countRef.current}</p>
+        <button onClick={increaseCountState}>State 올려</button>
+        <button onClick={increaseRef}>Ref 올려</button> // 올라가고 있으니 렌더링되지는 않음
+    </div>
+)
+
+ex) refresh 시 자동으로 focus
+
+const inputRef = useRef();
+useEffect(() => {
+    inputRef.current.focus();
+}, [])
+const login = () => { // 환영 멘트 입력 후 다시 focus
+    alert(`환영합니다 ${inputRef.current.value}!`)
+    inputRef.current.focus();
+}
+return (
+    <div>
+        <input ref={inputRef} type="text" placeholder="username"></input>
+        <button onClick={login}>로그인</button>
+    </div>
+)

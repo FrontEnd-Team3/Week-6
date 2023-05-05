@@ -1,0 +1,14 @@
+
+React.memo는 props가 변화하지 않는 컴포넌트를 렌더링하지 않음.
+고차함수임.
+
+다만 다른 훅 사용 시 props 변화 없어도 다시 렌더링됨.
+
+그런데, 만약 객체를 전달 시 안됨. 즉, 객체를 useMemo에 있는 즉시실행 함수로
+
+const name = useMemo(()=>({
+    lastName: "홍",
+    firstName: "길동"
+}), [])
+
+함수를 props에 전달해도 마찬가지 문제 발생.

@@ -1,0 +1,54 @@
+
+상태
+
+const [state, setState] = useState(초기값);
+스테이트 변경 시마다 리렌더링
+
+ex) 시계
+
+const [time, setTime] = useState(1);
+
+const handleClick = () => {
+    let newTime;
+    if (time >= 12) newTime = 1;
+    else newTime = time + 1;
+    setTime(newTime);
+}
+return (
+    <div>
+        <span>현재 시각: {time}시</span>
+        <button onClick={handleClick}>Update</button>
+    </div>
+)
+
+ex) 이름 추가
+
+콜백을 쓰는 이유는 바로 asyncronous하기 때문에 문제가 생길 수 있어
+이를 예방하기 위함이다.
+
+const heavyWork = () => {
+    console.log("엄청 무거운 작업!!!!")'
+    return ["홍길동", "김민수"]
+}
+
+const [names, setName] = useState(() => heavyWork) // 만약 함수가 들어가면 스테이트의 초기값을 사용할 때마다 사용된다는 단점이 있음.
+// 이때 콜백을 넣음!
+const [input, setInput] = useState("");
+
+const handleInputChange = (e) => {
+    setInput(e.target.value);
+}
+
+const handleUpload = () => {
+    setNames((prevState) => [input, ...prevState];
+}
+
+return (
+    <div>
+        <input type="text" value={input} onChange={handleInputChange} />
+        <button onClick={handleUpload}>Upload</button>
+        {names.map((name, idx) => {
+            return <p key={idx}>{name}</p>'
+        })}
+    </div>
+)

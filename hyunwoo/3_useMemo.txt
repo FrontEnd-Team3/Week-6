@@ -1,0 +1,52 @@
+
+컴포넌트 최적화: useMemo, useCallback
+
+Memo: Memoization(자주 필요한 값을 캐싱)
+
+렌더링: Component 함수 호출 -> 모든 내부 변수 초기화
+
+불필요한 값까지 메모하면 성능이 오히려 악화됨.
+
+ex) const hardCalculate = (number) => {
+    console.log("어려운 계산!")
+    for (let i = 0; i < 999999999; i++) {}
+    return number + 10000;
+}
+
+const easyCalculate = (number) => {
+    console.log("짱 쉬운 계산!")
+    return number + 1;
+}
+
+function App() {
+    const [hardNumber, setHardNumber] = useState(1);
+    const [easyNumber, setEasyNumber] = useState(1); // 이것이 변경되었을 hardSum이 안 불리는 방법이 없을까?
+
+    const hardSum = useMemo(() => {
+        return hardCalculate(hardNumber);
+    }, [hardNumber]) // 배열 안의 값이 변할 때만 콜백이 실행됨!!
+    const easySum = hardCalculate(hardNumber);
+
+    return (
+        <div>
+            <h3>어려운 계산기</h3>
+            <input
+                type="number"
+                value={hardNumber}
+                onChange={(e) => setHardNumber(parseInt(e.target.value))}
+            />
+            <span> + 10000 = {hardSum}</span>
+            <h3>쉬운 계산기</h3>
+            <input
+                type="number"
+                value={easyNumber}
+                onChange={(e) => setHardNumber(parseInt(e.target.value))}
+            />
+            <span> + 1 = {easySum}</span>
+        </div>
+    )
+}
+
+ex)
+
+useEffect 배우고 나서...

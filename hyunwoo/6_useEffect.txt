@@ -1,0 +1,49 @@
+
+useEffect(() => {
+
+}) // 렌더링될 때마다
+
+useEffect(() => {
+
+}, [value]) // 값이 바뀔 때마다
+
+useEffect(() => {
+
+}, []) // 첫 렌덜이 때만
+
+return 값에 unmount될 때 실행할 콜백 함수를 넣음.
+
+function UseEffect() {
+    const [count, setCount] = useState(1)
+    const [name, setName] = useState('')
+    const [array, setArray] = useState([])
+
+    const handleCountUpdate = () => {
+        setCount(count + 1)
+    }
+
+    const handleInputChange = (e) => {
+        setName(e.target.value)
+    }
+
+    useEffect(() => {
+        console.log('랜더링')
+    }, [count])
+
+    const updateInput = () => {
+        setArray([...array, name])
+    }
+
+  return (
+    <div>
+        <button onClick={handleCountUpdate}>Update</button> <br />
+        <span>count: {count}</span><br />
+        <input type="text" value={name} onChange={handleInputChange} /><br />
+        <span>name: {name}</span><br />
+        <button onClick={updateInput}>Update</button>
+        <p>{array}</p>
+    </div>
+  )
+}
+
+export default UseEffect
