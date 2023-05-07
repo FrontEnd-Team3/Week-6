@@ -1,0 +1,469 @@
+
+
+
+1. useState : useState를 사용하면 상태를 간단하게 선언하고, 이를 업데이트할 수 있다
+
+ - 사용법 : const [state, setState] = useState(초기값)
+
+ - 장점1: 함수형 컴포넌트에서도 상태를 관리할 수 있다. 
+         예를 들어, useState를 사용하면 함수형 컴포넌트에서도 상태를 간편하게 관리할 수 있다.
+ * useState 장점1 예시
+    import React, { useState } from 'react';
+
+    function Example() {
+        const [count, setCount] = useState(0);
+
+        const increment = () => {
+            setCount(count + 1);
+        };
+
+        return (
+            <div>
+            <p>You clicked {count} times</p>
+            <button onClick={increment}>Click me</button>
+            </div>
+        );
+    }
+
+ - 장점2: 상태를 업데이트할 때 React가 자동으로 컴포넌트를 리렌더링한다.
+
+ * useState 장점2 예시
+    function Example() {
+        const [name, setName] = useState('John');
+
+        const handleInputChange = (e) => {
+            setName(e.target.value);
+        };
+
+        return (
+            <div>
+            <input type="text" value={name} onChange={handleInputChange} />
+            <p>Hello, {name}!</p>
+            </div>
+        );
+        }
+
+ - 단점1: 상태가 변경될 때마다 컴포넌트가 리렌더링된다.
+         useState를 사용하면 상태를 업데이트할 때마다 컴포넌트가 리렌더링된다. 
+         특히, 복잡한 컴포넌트에서는 상태가 변경될 때마다 컴포넌트 전체가 리렌더링되어 성능이 저하될 가능성이 높다.
+ 
+ * useState 단점1 예시
+    function TodoList() {
+        const [items, setItems] = useState([
+            { id: 1, text: "Buy milk" },
+            { id: 2, text: "Walk the dog" },
+            { id: 3, text: "Do laundry" }
+        ]);
+
+        const handleDelete = (id) => {
+            setItems(items.filter((item) => item.id !== id));
+        };
+
+        return (
+            <ul>
+            {items.map((item) => (
+                <li key={item.id}>
+                {item.text}
+                <button onClick={() => handleDelete(item.id)}>Delete</button>
+                </li>
+            ))}
+            </ul>
+        );
+        }
+    => 이 경우, handleDelete 함수가 호출될 때마다 items 상태가 업데이트되고, 
+       이에 따라 TodoList 컴포넌트가 다시 렌더링된다. 
+       그러나, 이 경우 TodoList 컴포넌트가 다시 렌더링되는 것은 굳이 필요하지 않다. 
+       TodoList 컴포넌트는 items 상태가 변경될 때마다 모든 항목을 다시 렌더링해야 하기 때문
+       TodoList 컴포넌트가 다시 렌더링되는 것은 성능에 악영향을 미칠 수 있다. 
+       이런 경우에는 useCallback 또는 React.memo와 같은 hook으로 최적화할 수 있다.
+
+
+
+2. useEffect : 어떤 컴포넌트가 Mount(화면에 처음 렌더링) / Update(다시 렌더링) / Unmount(페이지 종료) 될 때 처리할 코드를 실행시키고 싶다면
+               useEffect를 사용하면된다
+ - 사용법1: 
+         useEffect(()=>{
+            //작업
+         })   => 페이지가 렌더링될때마다 실행됨
+ - 사용법2: 
+         useEffect(()=>{
+            //작업
+         },[])   => 페이지가 처음 화면에 렌더링될때 실행
+ - 사용법3: 
+         useEffect(()=>{
+            //작업
+         },[value])   => 페이지가 처음 화면에 렌더링될때 실행 & value 값이 바뀔때마다 실행 
+
+ - 사용법(clean up): 
+         useEffect(()=>{
+            //서비스를 구독하는 코드
+            return (()=>{
+                //서비스 구독을 해지하는 코드 ==> return을 사용해 정리해주는 단계 필요
+            })
+         },[])
+
+ - 장점1: 비동기 작업을 수행할 수 있습니다. useEffect는 비동기 함수를 실행할 수 있으며, 
+        데이터를 가져오거나 업데이트하는 등의 비동기 작업을 수행할 수 있다.
+
+ * useEffect 장점1 예시 
+ useEffect(() => {
+    const fetchData = async () => {
+        const response = await fetch('https://api.example.com/data');
+        const data = await response.json();
+        setData(data);
+    };
+
+    fetchData();
+ }, []);
+
+ - 장점2: 컴포넌트에서 여러 개의 useEffect를 사용하여 다양한 side effect를 관리할 수 있다.
+
+ * useEffect 장점2 예시
+ function MyComponent(props) {
+  const { id } = props;
+  const [data, setData] = useState(null);
+  const [error, setError] = useState(null);
+
+  // id가 변경될 때마다 데이터를 가져옴
+  useEffect(() => {
+    fetchData(id).then((response) => {
+      setData(response.data);
+    }).catch((error) => {
+      setError(error);
+    });
+  }, [id]);
+
+    // 컴포넌트가 mount될 때마다 타이틀을 업데이트
+  useEffect(() => {
+    document.title = `Data for ${id}`;
+  }, []);
+
+  return (
+    <div>
+        ...
+    </div>
+  );
+ }
+
+ - 단점: 컴포넌트의 상태나 속성(props)이 변경될 때마다 매번 실행
+
+ * useEffect 단점 예시
+ 예를 들어, 다음과 같은 코드에서 useEffect는 count가 변경될 때마다 실행됩니다.
+
+    function Counter() {
+        const [count, setCount] = useState(0);
+
+        useEffect(() => {
+            console.log(`Count: ${count}`);
+        }, [count]);
+
+        return (
+            <div>
+            <p>You clicked {count} times</p>
+            <button onClick={() => setCount(count + 1)}>Click me</button>
+            </div>
+        );
+    }
+    /* 여기서 setCount를 호출할 때마다 useEffect가 실행, console.log도 매번 실행 
+       그래서 컴포넌트 성능을 저하시킬 수 있다. 
+       => useEffect 내에서 비용이 큰 작업을 수행하는 경우, memoization을 사용하여 최적화 필요 */
+
+
+
+3. useRef : useRef Hook 은 함수형 컴포넌트에서 ref 를 쉽게 사용 할 수 있게 해준다
+
+ - 사용법: const ref = useRef(value) 
+                            ------> 여기서 value는 {current: value}로 저장됨
+                                    // current.value로 접근하여 변경가능
+ - 장점1: useRef는 컴포넌트가 계속 리랜더링 되어도 컴포넌트가 언마운트 되기 전까지는 값을 그대로 유지할 수 있다.
+         => useRef를 사용하면 불필요한 리랜더링을 방지할 수 있다.
+         => useRef를 사용하여 컴포넌트의 내부 변수를 유지할 수 있다
+ * 예시
+    function Counter() {
+        const countRef = useRef(0);
+        const prevCountRef = useRef(0);
+
+        function increment() {
+            countRef.current += 1;
+        }
+
+        useEffect(() => {
+            prevCountRef.current = countRef.current;
+        });
+
+        return (
+            <div>
+            <p>Current count: {countRef.current}</p>
+            <p>Previous count: {prevCountRef.current}</p>
+            <button onClick={increment}>Increment</button>
+            </div>
+        );
+    }
+
+ - 장점2: useRef를 사용하면 함수형 컴포넌트에서 DOM 요소에 접근할 수 있다. (권장 x 꼭 필요한 상황만)
+         예를 들어, useRef를 사용하여 input 요소에 접근하여 사용자가 입력한 값을 가져올 수 있습니다.
+ * 예시 => 보통 인풋 요소를 클릭하지 않아도 focus를 주고 싶을때 사용한다고 한다
+    import { useRef } from 'react';
+
+    function App() {
+        const inputRef = useRef(null);
+
+        const handleClick = () => {
+            inputRef.current.focus();
+        };
+
+    return (
+            <div>
+            <button onClick={handleClick}>Focus Input</button>
+            <input type="text" ref={inputRef} />
+            </div>
+        );
+    }
+
+ export default App;
+
+ - 단점: useRef를 사용한 상태 변경 => useRef는 언제든지 초기값을 바꿀 수 있다.
+ * 예시
+
+    const ref = useRef(":)")   ==> {current: ":)"}
+    ref.current = "hello :)"   ==> {current: "hello :)"}
+    ref.current = "hey :D"   ==> {current: "hey :D"} 
+    
+    //이를 남용하면 예기치 않은 동작을 일으키거나 디버깅하기 어려운 오류를 발생시킬 수 있다.
+
+
+
+4. useMemo: useMemo의 Memo는 Memoization을 뜻한다 
+            무거운 연산을 하는 함수의 반환 값을 캐싱하여 성능을 최적화하는 데 사용된다.
+                (*Memoization은 동일한 값을 디런하는 함수를 반복적으로 호출해야한다면 맨 처음 값을 계산할때
+                해당 값을 메모리에 저장해서 필요할때마다 또다시 연산하지 않고 메모리에서 꺼내서 재사용하는 기법)
+ - 사용법: 
+    function Component(){
+        const value = useMemo(() => {
+            return 함수~   ==>// 첫번째 인자로 콜백함수
+        }, [의존성배열])        // 두번째 인자로 의존성 배열을 받는다
+    }
+    (*의존성 배열 => 배열안의 인자의 값이 업데이트 될때만 콜백 함수를 다시 호출해서 메모이제이션된 값을 업데이트해서 다시 메모이제이션 해줌)
+    (*[] 빈배열을 넘겨주면 맨 처음 컴포넌트가 마운트 되었을 때만 값을 계산하고 이후에는 항상 메모이제이션 된 값을 꺼내와서 사용함)
+
+ - 장점: 무거운 연산을 하는 함수의 반환 값을 캐싱하여 성능을 최적화할 수 있다.
+        => 컴포넌트 렌더링이 자주 발생하는 상황에서, useMemo를 사용하여 불필요한 계산을 최소화할 수 있다.
+ - 장점2: useMemo를 사용하여 동일한 값을 계속해서 계산하지 않고, 이전에 계산한 값을 재사용하여 성능을 향상시킬 수 있다.
+ * 예시
+    import { useMemo } from 'react';
+
+    function MyComponent({ a, b }) {
+        const result = useMemo(() => {
+            console.log('안녕하심까? :)');
+            return a + b;
+        }, [a, b]);
+        //위 코드에서 useMemo를 사용하여 result 값을 캐싱, a와 b 값이 변경될 때만 result 값을 계산한다.
+
+        return (
+            <div>
+            <p>{result}</p> 
+            </div>
+        );
+    }
+
+ - 단점: useMemo를 사용하여 계산한 값이 자주 변경되는 경우에는, 매번 값이 변경될 때마다 계산이 다시 발생하기 때문에 
+        useMemo를 사용하는 것이 오히려 성능을 떨어뜨릴 수 있다. 
+        따라서 useMemo를 사용할 때에는, 해당 값이 얼마나 자주 변경되는지에 대한 고려가 필요
+ * 예시
+    import { useMemo } from 'react';
+
+    function MyComponent({ a, b }) {
+        const result = useMemo(() => {
+            console.log('Calculating result...');
+            return a * b;
+        }, [a]); //=> useMemo를 사용하여 result 값을 캐싱! 하지만 b 값이 변경되어도 
+                      result 값을 다시 계산하지 않는다. 이 경우, 
+                      b의 값이 자주 변경된다면 예상치 못한 동작이 발생할 수 있습니다. 
+
+        return (
+            <div>
+                <p>{result}</p>
+            </div>
+        );
+    }
+
+
+
+5. useCallback: useCallback은 함수를 캐싱하여, 필요한 경우에만 새로운 함수를 생성하도록 함
+ - 사용법: 
+    useCallback (() => {
+        return value;    ==> 첫번째 인자로 전달된 콜백함수 자체를 메모이제이션 해줌
+    }, [item])
+        ----> 의존성배열
+
+ - 장점: 1. 불필요한 렌더링을 방지하여 애플리케이션의 성능을 향상시킬 수 있습니다.
+        * 예시
+            import React, { useState, useCallback } from 'react';
+
+            function MyComponent() {
+                const [count, setCount] = useState(0);
+
+                // handleClick 함수를 캐싱하여 불필요한 렌더링을 방지
+                const handleClick = useCallback(() => {
+                    setCount(count + 1);
+                }, [count]);
+
+                return (
+                    <div>
+                    <p>Count: {count}</p>
+                    <button onClick={handleClick}>Click me</button>
+                    </div>
+                );
+            }
+
+        2. 의존성 배열을 사용하여 컴포넌트 재렌더링 제어 => useCallback은 의존성 배열을 사용하여 함수가 의존하는 변수가 변경될 때만 함수를 새로 생성함 
+                                                 이를 통해, 함수가 사용하는 변수가 변경되지 않은 경우에는 재랜더링이 발생하지 않도록 제어할 수 있다.
+        * 예시
+                import React, { useState, useCallback } from 'react';
+
+                function MyComponent() {
+                    const [count, setCount] = useState(0);
+
+                    // handleClick 함수가 count 상태에 의존하므로, count가 변경될 때만 새로운 함수를 생성
+                    const handleClick = useCallback(() => {
+                        setCount(count + 1);
+                    }, [count]);
+
+                    // handleReset 함수는 count 상태에 의존하지 않으므로, 의존성 배열을 빈 배열로 설정하여 한 번만 함수를 생성
+                    const handleReset = useCallback(() => {
+                        setCount(0);
+                    }, []);
+
+                    return (
+                        <div>
+                        <p>Count: {count}</p>
+                        <button onClick={handleClick}>Click me</button>
+                        <button onClick={handleReset}>Reset</button>
+                        </div>
+                    );
+                }
+
+        3. 함수 전달 시 메모리 누수 방지: 함수를 props로 전달할 때, 
+           useCallback을 사용하여 캐싱하면 해당 함수가 변경되지 않는 이상 메모리 누수를 방지할 수 있다.
+        * 예시
+
+                import React, { useState, useCallback } from 'react';
+
+                function MyComponent() {
+                    const [count, setCount] = useState(0);
+
+                    // handleButtonClick 함수를 props로 전달할 때, useCallback을 사용하여 메모리 누수 방지
+                    const handleButtonClick = useCallback(() => {
+                        setCount(count + 1);
+                    }, [count]);
+
+                    return (
+                        <div>
+                        <p>Count: {count}</p>
+                        <MyButton onClick={handleButtonClick} />
+                        </div>
+                    );
+                }
+
+                function MyButton(props) {
+                    // onClick 함수를 props로 전달받아 사용
+                    return <button onClick={props.onClick}>Click me</button>;
+                }
+
+ - 단점: useCallback의 단점 중 하나는, 모든 함수에 대해서 사용할 필요가 없다는 점이다. 
+        함수가 자주 호출되지 않는다면, useCallback을 사용하더라도 성능 향상에 큰 영향을 미치지 않을 수 있다. 
+        게다가, 캐싱된 함수를 사용하더라도, 이 함수가 참조하는 변수가 변경될 경우, 새로운 함수를 생성해야해서 
+        useCallback을 사용하더라도, 최적화 효과를 볼 수 없다.
+
+ * 예시
+        import React, { useState } from 'react';
+
+        function ItemList({ items }) {
+            const [filter, setFilter] = useState('');
+
+            const handleFilterChange = (e) => {
+                setFilter(e.target.value);
+            };
+
+            const filteredItems = items.filter((item) => {
+                return item.includes(filter);
+            });
+
+            return (
+                <div>
+                <input type="text" value={filter} onChange={handleFilterChange} />
+                <ul>
+                    {filteredItems.map((item) => (
+                    <li key={item}>{item}</li>
+                    ))}
+                </ul>
+                </div>
+            );
+        }
+        // items라는 배열을 받아와서, 이를 순회하면서 각 항목을 보여주는 코드를 예시로 보면
+           filter 값이 변경될 때마다 filterdItems도 다시 계산된다 
+           하지만, **items 배열이 변경되지 않는 한** filterdItems는 항상 동일하다 //최적화 효과없음
+           따라서, useMemo를 사용하여 filteredItems를 캐싱하는게 더 나은 상황임
+
+
+
+6. React.memo: 컴포넌트를 랜더링할 때 이전 결과를 재사용할 수 있는 상황이라면, 
+               랜더링 자체를 수행하지 않도록 최적화해주는 React의 고차 컴포넌트
+ - 사용법: 
+    const MyComponent = React.memo(function MyComponent(props) {
+                            /* 컴포넌트 로직 */
+    });
+
+ - 장점: 
+   1. 성능 향상: props가 변경되지 않았을 때 랜더링을 수행하지 않으므로 성능이 향상된다.
+   2. 코드 간결화: 클래스형 컴포넌트에서 shouldComponentUpdate 메서드와 유사한 역할해 shouldComponentUpdate를 구현하지 않아도 되므로 코드가 간결해짐
+
+   * 예시: 
+            import React from "react";
+
+            const MyComponent = React.memo((props) => {  // ==> 컴포넌트의 상태가 변할 때마다 MyComponent도 다시 렌더링된다. 
+                                                                하지만 text prop이 변경되지 않았을 경우, MyComponent는 불필요한 렌더링을 하게됨
+                                                                이때! React.memo를 사용하면 MyComponent가 이전과 동일한 props를 받았을 때, 
+                                                                불필요한 렌더링을 하지 않고 이전에 렌더링된 결과를 재사용할 수 있다
+            console.log("리액트 왜이렇게 어렵지");
+            return <div>{props.text}</div>;
+            });    
+
+            function App() {
+            const [count, setCount] = React.useState(0);
+            const [text, setText] = React.useState("");
+
+            return (
+                <div>
+                <button onClick={() => setCount(count + 1)}>Increment</button>
+                <input value={text} onChange={(e) => setText(e.target.value)} />
+                <MyComponent text={text} />
+                </div>
+            );
+            }
+
+
+ - 단점: React.memo를 사용하면 컴포넌트가 동일한 props를 받았을 때만 리렌더링되기 때문에, 
+        컴포넌트 내부에서 상태가 변경되어도 리렌더링이 되지 않는다는 것이 있다.
+ * 예시
+    import React, { useState } from 'react';
+
+    const Counter = React.memo(({ count }) => {
+        const [value, setValue] = useState(0);
+
+        const handleClick = () => {
+            setValue(value + 1);
+        };
+
+        return (
+            <div>
+            <p>Count: {count}</p>
+            <p>Value: {value}</p>
+            <button onClick={handleClick}>Increase value</button>
+            </div>
+        );
+    });
+
+    export default Counter;
+    // Counter 컴포넌트는 count props가 변경되었을 때만 리렌더링이 되므로, value 상태가 변경되어도 Counter 컴포넌트가 다시 렌더링되지 않는다. 
+       따라서 value 상태를 props로 전달하여 Counter 컴포넌트를 리렌더링할 필요가 있다.
